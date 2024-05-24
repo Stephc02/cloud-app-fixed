@@ -1,0 +1,25 @@
+runtime: python
+env: flex
+entrypoint: gunicorn -b :$PORT main:app
+
+runtime_config:
+  operating_system: ubuntu22
+
+env_variables:
+  CLOUD_STORAGE_BUCKET: random-numbers1
+
+automatic_scaling:
+  min_num_instances: 5
+  max_num_instances: 15
+  cool_down_period_sec: 80
+  cpu_utilization:
+    target_utilization: 0.5
+
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+
+service: api
+
+

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Number Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Random Number Generator</h1>
+    <button id="generateButton">Generate Random Numbers</button>
+    <button id="getResultsButton" disabled>Get Results</button>
+    <button id="deleteButton">Delete Bucket Contents</button>
+    <div id="resultsContainer" class="hidden">
+        <p id="smallestNumber"></p>
+        <p id="largestNumber"></p>
+    </div>
+    <div id="randomNumbers"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const generateButton = document.getElementById("generateButton");
+            const getResultsButton = document.getElementById("getResultsButton");
+            const resultsContainer = document.getElementById("resultsContainer");
+            const smallestNumberElement = document.getElementById("smallestNumber");
+            const largestNumberElement = document.getElementById("largestNumber");
+
+            async function getRandomNumber() {
+                try {
+                    const response = await fetch('/generate');
+                    const data = await response.json();
+                    return data.randomNumber;
+                } catch (error) {
+                    console.error('Error fetching random number:', error);
+                    throw error;
+                }
+            }
+
+            async function generateRandomNumbers() {
+                const batchSize = 10;
+                const batches = 10;
+                const allRandomNumbers = [];
+
+                for (let i = 0; i < batches; i++) {
+                    const randomNumberPromises = [];
+                    for (let j = 0; j < batchSize; j++) {
+                        randomNumberPromises.push(getRandomNumber());
+                    }
+
+                    try {
+                        const randomNumbers = await Promise.all(randomNumberPromises);
+                        allRandomNumbers.push(randomNumbers);
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                }
+
+                generateButton.disabled = true;
+                getResultsButton.disabled = false;
+                resultsContainer.classList.remove("hidden");
+            }
+
+            generateButton.addEventListener("click", generateRandomNumbers);
+
+           
+
+            getResultsButton.addEventListener("click", function () {
+                console.log("Get Results button clicked");
+                getResultsButton.disabled = true;
+                fetch("/results")
+                    .then((response) => {
+                        console.log("Received response from /results:", response);
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        console.log("Parsed JSON data:", data);
+                        smallestNumberElement.textContent = `Smallest Number: ${data.min}`;
+                        largestNumberElement.textContent = `Largest Number: ${data.max}`;
+                        resultsContainer.classList.remove("hidden");
+                        console.log("Updated the UI with results");
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching results:", error);
+                        console.error("Error status code:", error.response.status);
+                        console.error("Error message:", error.message);
+                        alert("Error fetching results. Please try again later.");
+                    })
+                    .finally(() => {
+                        generateButton.disabled = false;
+                    });
+            });
+
+            getResultsButton.disabled = true;
+        });
+
+
+        document.getElementById('deleteButton').addEventListener('click', function() {
+            fetch('/delete_bucket_contents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Bucket contents deleted successfully');
+                } else {
+                    throw new Error('Failed to delete bucket contents');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting bucket contents:', error);
+            });
+        });
+
+
+
+    </script>
+</body>
+</html>
