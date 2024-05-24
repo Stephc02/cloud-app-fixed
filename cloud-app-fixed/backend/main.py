@@ -5,9 +5,10 @@ import os
 import subprocess
 
 # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r"C:\Users\ANNE CREMONA\Downloads\gifted-pulsar-422809-q0-b4d9cc90c98c.json"
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = r"C:\Users\ANNE CREMONA\Downloads\gifted-pulsar-422809-q0-b4d9cc90c98c.json"
 
-app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
+# app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
+app = Flask(__name__)
 
 # Initialize the Google Cloud Storage client
 storage_client = storage.Client()
@@ -47,8 +48,7 @@ def store_random_number(random_number):
 
 @app.route('/')
 def home():
-    print(f"Rendering home page in instance {GAE_INSTANCE}")
-    return render_template('index3.html')
+    return jsonify({'message': 'Backend is running'}), 200
 
 @app.route('/delete_bucket_contents', methods=['POST'])
 def delete_bucket_contents():
