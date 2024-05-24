@@ -65,13 +65,20 @@ def generate_random_number():
     """
     Generates a single random number and stores it in the Cloud Storage bucket.
     """
-    random_number = random.randint(0, 100000)
-    
-    # Store the random number in the Cloud Storage bucket
-    store_random_number(random_number)
-    
-    print(f"Generated and stored random number {random_number} in instance {GAE_INSTANCE}")
-    return jsonify({'randomNumber': random_number})
+    try:
+        random_number = random.randint(0, 100000)
+        
+        # Store the random number in the Cloud Storage bucket
+        store_random_number(random_number)
+        
+        print(f"Generated and stored random number {random_number} in instance {GAE_INSTANCE}")
+        return jsonify({'randomNumber': random_number})
+    except Exception as e:
+        # Log the error
+        app.logger.error(f"Error generating random number in instance {GAE_INSTANCE}: {str(e)}")
+        
+        # Return an error response
+        return jsonify({'error': 'An error occurred while generating random number'}), 500
 
 @app.route('/results', methods=['GET'])
 def get_results():
