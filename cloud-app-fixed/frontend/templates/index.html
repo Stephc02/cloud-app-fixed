@@ -54,7 +54,7 @@
                         console.error('Error:', error);
                     }
                 }
-
+                document.getElementById('randomNumbers').textContent = `Random Numbers: ${allRandomNumbers.join(', ')}`;
                 generateButton.disabled = true;
                 getResultsButton.disabled = false;
                 resultsContainer.classList.remove("hidden");
