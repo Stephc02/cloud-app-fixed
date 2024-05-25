@@ -4,11 +4,13 @@ from google.cloud import storage
 import random
 import os
 import subprocess
+from flask_cors import CORS
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
+CORS(app) 
 
 # Initialize the Google Cloud Storage client
 storage_client = storage.Client()
