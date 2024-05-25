@@ -14,6 +14,7 @@
     <div id="resultsContainer" class="hidden">
         <p id="smallestNumber"></p>
         <p id="largestNumber"></p>
+        <pre id="detailedResults"></pre> <!-- New Line -->
     </div>
     <div id="randomNumbers"></div>
 
@@ -24,6 +25,7 @@
             const resultsContainer = document.getElementById("resultsContainer");
             const smallestNumberElement = document.getElementById("smallestNumber");
             const largestNumberElement = document.getElementById("largestNumber");
+            const detailedResultsElement = document.getElementById("detailedResults"); // New Line
 
             async function getRandomNumber() {
                 try {
@@ -49,7 +51,7 @@
 
                     try {
                         const randomNumbers = await Promise.all(randomNumberPromises);
-                        allRandomNumbers.push(randomNumbers);
+                        allRandomNumbers.push(...randomNumbers);
                     } catch (error) {
                         console.error('Error:', error);
                     }
@@ -77,6 +79,7 @@
                         console.log("Parsed JSON data:", data);
                         smallestNumberElement.textContent = `Smallest Number: ${data.min}`;
                         largestNumberElement.textContent = `Largest Number: ${data.max}`;
+                        detailedResultsElement.textContent = data.output; // New Line
                         resultsContainer.classList.remove("hidden");
                         console.log("Updated the UI with results");
                     })
