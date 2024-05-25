@@ -1,9 +1,12 @@
+import logging
 from flask import Flask, jsonify, request
 from google.cloud import storage
 import random
 import os
 import subprocess
-import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -12,11 +15,9 @@ storage_client = storage.Client()
 bucket_name = os.environ.get('CLOUD_STORAGE_BUCKET', 'random-numbers1')
 bucket = storage_client.bucket(bucket_name)
 
-# Logging setup
-logging.basicConfig(level=logging.INFO)
-
 # Fetch GAE instance ID if available
 GAE_INSTANCE = os.environ.get('GAE_INSTANCE', 'Unknown')
+logging.info(f"GAE_INSTANCE: {GAE_INSTANCE}")
 
 @app.route('/')
 def home():
@@ -26,11 +27,10 @@ def home():
 @app.route('/delete_bucket_contents', methods=['POST'])
 def delete_bucket_contents():
     try:
-        # Use subprocess to execute gsutil command to delete all objects in the bucket
-        subprocess.run(['gsutil', '-m', 'rm', '-r', f'gs://{bucket_name}/*'])
+        subprocess.run(['gsutil', '-m', 'rm', '-r', f'gs://{bucket_name}/*'], check=True)
         logging.info(f"Instance {GAE_INSTANCE} deleted bucket contents")
         return jsonify({'message': 'Bucket contents deleted successfully'}), 200
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         logging.error(f"Instance {GAE_INSTANCE} error deleting bucket contents: {e}")
         return jsonify({'error': str(e)}), 500
 
@@ -62,6 +62,5 @@ def get_results():
 if __name__ == '__main__':
     app.run(host='127.0.0.0', port=8080)
 
- 
   
 
