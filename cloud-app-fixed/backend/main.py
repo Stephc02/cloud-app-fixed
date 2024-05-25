@@ -25,6 +25,31 @@ except Exception as e:
     logging.error(f"Error fetching GAE_INSTANCE: {e}")
     GAE_INSTANCE = 'Unknown'
 
+def fetch_random_numbers_from_bucket():
+    """
+    Fetches all random numbers stored in the Cloud Storage bucket.
+    """
+    numbers = []
+    blobs = bucket.list_blobs(prefix='random_numbers/')
+    for blob in blobs:
+        try:
+            data = blob.download_as_string().decode('utf-8')
+            numbers.append(int(data))
+        except Exception as e:
+            logging.error(f"Error decoding random number from blob {blob.name}: {e}")
+    return numbers
+
+def store_random_number(random_number):
+    """
+    Stores a random number in the Cloud Storage bucket.
+    """
+    blob = bucket.blob(f'random_numbers/{random_number}.txt')
+    try:
+        blob.upload_from_string(str(random_number))
+        logging.info(f"Instance {GAE_INSTANCE} stored random number {random_number}")
+    except Exception as e:
+        logging.error(f"Instance {GAE_INSTANCE} error storing random number {random_number}: {e}")
+
 @app.route('/')
 def home():
     logging.info(f"Instance {GAE_INSTANCE} handling the request")
@@ -43,30 +68,17 @@ def delete_bucket_contents():
 @app.route('/generate', methods=['GET'])
 def generate_random_number():
     random_number = random.randint(0, 100000)
-    blob = bucket.blob(f'random_numbers/{random_number}.txt')
-    try:
-        blob.upload_from_string(str(random_number))
-        logging.info(f"Instance {GAE_INSTANCE} generated and stored random number {random_number}")
-        return jsonify({'randomNumber': random_number})
-    except Exception as e:
-        logging.error(f"Instance {GAE_INSTANCE} error storing random number {random_number}: {e}")
-        return jsonify({'error': str(e)}), 500
+    store_random_number(random_number)
+    return jsonify({'randomNumber': random_number})
 
 @app.route('/results', methods=['GET'])
 def get_results():
-    try:
-        blobs = bucket.list_blobs(prefix='random_numbers/')
-        random_numbers = [int(blob.download_as_string()) for blob in blobs]
-        min_number = min(random_numbers)
-        max_number = max(random_numbers)
-        logging.info(f"Instance {GAE_INSTANCE} fetched results: min {min_number}, max {max_number}")
-        return jsonify({'min': min_number, 'max': max_number})
-    except Exception as e:
-        logging.error(f"Instance {GAE_INSTANCE} error fetching results: {e}")
-        return jsonify({'error': str(e)}), 500
+    random_numbers = fetch_random_numbers_from_bucket()
+    if not random_numbers:
+        return jsonify({'error': 'No random numbers found'}), 404
+    min_number = min(random_numbers)
+    max_number = max(random_numbers)
+    return jsonify({'min': min_number, 'max': max_number})
 
 if __name__ == '__main__':
     app.run(host='127.0.0.0', port=8080)
-
-  
-
