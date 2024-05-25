@@ -16,8 +16,14 @@ bucket_name = os.environ.get('CLOUD_STORAGE_BUCKET', 'random-numbers1')
 bucket = storage_client.bucket(bucket_name)
 
 # Fetch GAE instance ID if available
-GAE_INSTANCE = os.environ.get('GAE_INSTANCE', 'Unknown')
-logging.info(f"GAE_INSTANCE: {GAE_INSTANCE}")
+try:
+    GAE_INSTANCE = os.environ.get('GAE_INSTANCE')
+    if GAE_INSTANCE is None:
+        GAE_INSTANCE = 'Unknown'
+    logging.info(f"GAE_INSTANCE: {GAE_INSTANCE}")
+except Exception as e:
+    logging.error(f"Error fetching GAE_INSTANCE: {e}")
+    GAE_INSTANCE = 'Unknown'
 
 @app.route('/')
 def home():
