@@ -27,7 +27,7 @@
 
             async function getRandomNumber() {
                 try {
-                    const response = await fetch('/generate');
+                    const response = await fetch('https://api-dot-gifted-pulsar-422809-q0.ey.r.appspot.com/generate');
                     const data = await response.json();
                     return data.randomNumber;
                 } catch (error) {
@@ -62,12 +62,10 @@
 
             generateButton.addEventListener("click", generateRandomNumbers);
 
-           
-
             getResultsButton.addEventListener("click", function () {
                 console.log("Get Results button clicked");
                 getResultsButton.disabled = true;
-                fetch("/results")
+                fetch("https://api-dot-gifted-pulsar-422809-q0.ey.r.appspot.com/results")
                     .then((response) => {
                         console.log("Received response from /results:", response);
                         if (!response.ok) {
@@ -96,9 +94,8 @@
             getResultsButton.disabled = true;
         });
 
-
         document.getElementById('deleteButton').addEventListener('click', function() {
-            fetch('/delete_bucket_contents', {
+            fetch('https://api-dot-gifted-pulsar-422809-q0.ey.r.appspot.com/delete_bucket_contents', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -115,9 +112,6 @@
                 console.error('Error deleting bucket contents:', error);
             });
         });
-
-
-
     </script>
 </body>
 </html>
