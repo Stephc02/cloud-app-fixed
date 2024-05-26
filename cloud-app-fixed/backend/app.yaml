@@ -9,8 +9,11 @@ env_variables:
   CLOUD_STORAGE_BUCKET: random-numbers1
 
 automatic_scaling:
-  min_instances: 5
-  max_instances: 15
+  min_num_instances: 5
+  max_num_instances: 15
+  cool_down_period_sec: 80
+  cpu_utilization:
+    target_utilization: 0.5
 
 resources:
   cpu: 1
@@ -18,7 +21,6 @@ resources:
   disk_size_gb: 10
 
 service: api
-
 
 
 
